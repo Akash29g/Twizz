@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local env + secrets
+.env
+session.json
+seen.json
+
+# Downloads
+stories/
+
+# IDE stuff
+.vscode/
+.idea/

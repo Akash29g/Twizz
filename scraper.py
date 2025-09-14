@@ -22,7 +22,15 @@ DOWNLOAD_DIR = "stories"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
-# -----PyTesseract and Blocklist------
+# allow overriding tesseract path via env (only needed on weird hosts)
+TESSERACT_CMD = os.getenv("TESSERACT_CMD")
+if TESSERACT_CMD:
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+# otherwise pytesseract will use the system-installed tesseract (what we install in Docker)
+
+print("[DEBUG] DISCORD_TOKEN present:", bool(DISCORD_TOKEN))
+
+# --------------Blocklist-------------------
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
@@ -30,7 +38,6 @@ BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...",
              "imk","dumb","wanna", "sudo", "zero", "sorry", "replied","zero2sudo","proud","congrats","dm'd","dm","dms","mistake","before i post them."]
 
 cl = Client()
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # --- Discord client ---
 intents = discord.Intents.default()

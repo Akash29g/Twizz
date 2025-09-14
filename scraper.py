@@ -191,6 +191,11 @@ async def check_stories():
                 print(f"[OCR Result]\n{text}\n{'-'*40}")
                 await send_discord_message(text, filename)
 
+                # Delete the image after posting
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    print(f"[+] Deleted image: {filename}")
+
                 # ✅ Mark as seen
                 seen.add(story.pk)
                 save_seen(seen)

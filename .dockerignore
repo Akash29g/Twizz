@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+.env
+stories/
+seen.json
+session.json
+.git

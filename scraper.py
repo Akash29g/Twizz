@@ -34,7 +34,7 @@ print("[DEBUG] DISCORD_TOKEN present:", bool(DISCORD_TOKEN))
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...",
+BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...","anxious","scared","harm","married",
              "imk","dumb","wanna", "sudo", "zero", "sorry", "replied","zero2sudo","proud","congrats","dm'd","dm","dms","mistake","before i post them."]
 
 cl = Client()
@@ -173,6 +173,9 @@ async def check_stories():
             if download_image(story.thumbnail_url, filename):
                 print(f"[+] Downloaded: {filename}")
                 text = extract_text_from_image(filename)
+                if not text or len(text.split()) < 2:  # less than 2 words
+                    print(f"[SKIP] Story {story.pk} has no meaningful text, skipping...")
+                    continue
                 # Normalize OCR text
                 normalized_text = (
                 text.lower()

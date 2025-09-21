@@ -214,7 +214,7 @@ async def story_loop():
         print("\n--- Checking stories ---")
         await check_stories()
         print("Sleeping for some minutes...\n")
-        await asyncio.sleep(random.randint(270, 550))
+        await asyncio.sleep(random.randint(300, 600))
 
 # ---------------- MAIN ----------------
 @client.event

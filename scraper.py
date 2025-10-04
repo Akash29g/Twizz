@@ -92,7 +92,7 @@ def force_relogin():
 
 def safe_get_user_id(username: str):
     try:
-        return cl.user_info_by_username_v1(username).pk  # ✅ private API only
+        return cl.user_info_by_username_v1(username).pk
     except LoginRequired:
         print("[!] Login required during story fetch. Re-logging once...")
         try:
@@ -105,7 +105,7 @@ def safe_get_user_id(username: str):
         except Exception as e:
             print(f"[!] Failed to send DM alert: {e}")
 
-        return None  # caller should handle gracefully
+        return None
 
 
 # ---------------- OCR CLEAN ----------------
@@ -144,7 +144,7 @@ async def send_discord_message(text, image_path=None):
     embed = discord.Embed(
         title="🌟New Update",
         description=text if text else "No text detected",
-        color=0x5865F2  # Discord blurple
+        color=0x5865F2
     )
 
     if image_path:
@@ -184,13 +184,13 @@ async def check_stories():
                 print(f"[SKIP] Already posted story {story.pk}")
                 continue
 
-            await asyncio.sleep(random.randint(17, 52)) # 5–15 seconds delay between each story
+            await asyncio.sleep(random.randint(17, 52)) # x seconds delay between each story
 
             filename = os.path.join(DOWNLOAD_DIR, f"{story.pk}.jpg")
             if download_image(story.thumbnail_url, filename):
                 print(f"[+] Downloaded: {filename}")
                 text = extract_text_from_image(filename)
-                if not text or len(text.split()) < 2:  # less than 2 words
+                if not text or len(text.split()) < 2:  # less than 2 words then skip
                     print(f"[SKIP] Story {story.pk} has no meaningful text, skipping...")
                     continue
                 # Normalize OCR text
@@ -216,11 +216,11 @@ async def check_stories():
                     os.remove(filename)
                     print(f"[+] Deleted image: {filename}")
 
-                # ✅ Mark as seen
+                #  Mark as seen
                 seen.add(story.pk)
                 save_seen(seen)
 
-                await asyncio.sleep(random.randint(17, 64)) # 17-64 seconds delay between each story
+                await asyncio.sleep(random.randint(17, 64)) # x seconds delay between each story
 
     except LoginRequired:
     	print("[!] Login required during story fetch. NOT auto logging in.")
@@ -247,7 +247,7 @@ async def story_loop():
 
         if count % 6 == 0:
             print("[INFO] Completed 6 cycles, pausing for 1 hour...\n")
-            await asyncio.sleep(random.randint(3611,4008))  # 1 hour
+            await asyncio.sleep(random.randint(3611,4008))
         else:
             sleep_time = random.randint(711, 1623)
             print(f"[INFO] Sleeping for {sleep_time} seconds...\n")
@@ -259,14 +259,14 @@ async def on_ready():
     print(f"[+] Discord bot logged in as {client.user}")
     login_client()
 
-   # ✅ Cache the target user ID once
+   #  Cache the target user ID once
     global TARGET_USER_ID
     TARGET_USER_ID = safe_get_user_id(TARGET_USER)
     if not TARGET_USER_ID:
         print("[!] Could not fetch target user ID. Exiting...")
         return
 
-    # ✅ Keep images, no deletion
+    #  Keep images, no deletion
     asyncio.create_task(story_loop())
 
 client.run(DISCORD_TOKEN)

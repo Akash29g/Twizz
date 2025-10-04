@@ -7,4 +7,5 @@ __pycache__/
 stories/
 seen.json
 session.json
+blocklist.json
 .git

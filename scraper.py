@@ -34,8 +34,8 @@ print("[DEBUG] DISCORD_TOKEN present:", bool(DISCORD_TOKEN))
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...","anxious","scared","harm","married",
-             "imk","dumb","wanna", "sudo", "zero", "sorry", "replied","zero2sudo","proud","congrats","dm'd","dm","dms","mistake","before i post them."]
+BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...","anxious","scared","harm","married","q&a sticker","prestige","easy","scars","hot","hotter","prized","hey","reel","guys","flooding","heck",
+             "why recruiters still","imk","dumb","wanna", "sudo", "zero", "sorry", "replied","zero2sudo","proud","congrats","dm'd","dm","dms","mistake","before i post them."]
 
 cl = Client()
 
@@ -43,6 +43,12 @@ cl = Client()
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
+
+# --- Discord DM Alert on Login Failure ---
+async def send_dm_to_me(text):
+    user_id = int(os.getenv("DISCORD_USER_ID"))
+    user = await client.fetch_user(user_id)
+    await user.send(text)
 
 
 # --- Seen Stories ---
@@ -89,8 +95,17 @@ def safe_get_user_id(username: str):
         return cl.user_info_by_username_v1(username).pk  # ✅ private API only
     except LoginRequired:
         print("[!] Login required during story fetch. Re-logging once...")
-        login_client(force=True)
-        return cl.user_info_by_username_v1(username).pk
+        try:
+            # schedule DM on bot's existing event loop
+            loop = asyncio.get_running_loop()
+            loop.create_task(send_dm_to_me(
+                f"⚠️ ALERT: Instagram session invalid while fetching user ID for {username}. "
+                "Do NOT auto-login; refresh session.json manually from your PC."
+            ))
+        except Exception as e:
+            print(f"[!] Failed to send DM alert: {e}")
+
+        return None  # caller should handle gracefully
 
 
 # ---------------- OCR CLEAN ----------------
@@ -156,7 +171,7 @@ def download_image(url, path):
 async def check_stories():
     seen = load_seen()
     try:
-        user_id = safe_get_user_id(TARGET_USER)
+        user_id = TARGET_USER_ID
         stories = cl.user_stories(user_id)
 
         if not stories:
@@ -168,6 +183,8 @@ async def check_stories():
             if story.pk in seen:
                 print(f"[SKIP] Already posted story {story.pk}")
                 continue
+
+            await asyncio.sleep(random.randint(17, 52)) # 5–15 seconds delay between each story
 
             filename = os.path.join(DOWNLOAD_DIR, f"{story.pk}.jpg")
             if download_image(story.thumbnail_url, filename):
@@ -181,13 +198,13 @@ async def check_stories():
                 text.lower()
                 .replace("’", "'")
                 .replace("‘", "'")
-                .replace("…", "...")    
+                .replace("…", "...")
                 .strip()
                 )
                 normalized_blocklist = [w.lower().replace("…", "...").strip() for w in BLOCKLIST]
                 matched = [word for word in normalized_blocklist if word in normalized_text]
                 if matched:
-                    if ".com" not in normalized_text:  
+                    if ".com" not in normalized_text:
                         print(f"[SKIP] Blocklist word(s) {matched} found in {story.pk}: {text}")
                         continue
 
@@ -203,24 +220,51 @@ async def check_stories():
                 seen.add(story.pk)
                 save_seen(seen)
 
+                await asyncio.sleep(random.randint(17, 64)) # 17-64 seconds delay between each story
+
     except LoginRequired:
-        print("[!] Login required during story fetch. Skipping this cycle.")
+    	print("[!] Login required during story fetch. NOT auto logging in.")
+    	try:
+        	loop = asyncio.get_running_loop()
+	        loop.create_task(send_dm_to_me(
+        	    "⚠️ ALERT: Instagram session invalid during story fetch. "
+            	"Do NOT auto-login; refresh session.json manually from your PC."
+        	))
+    	except Exception as e:
+        	print(f"[!] Failed to send DM alert: {e}")
+
+    	return  # skip this cycle
 
 
 
 # ---------------- LOOP ----------------
 async def story_loop():
+    count = 0
     while True:
         print("\n--- Checking stories ---")
         await check_stories()
-        print("Sleeping for some minutes...\n")
-        await asyncio.sleep(random.randint(300, 600))
+        count += 1
+
+        if count % 6 == 0:
+            print("[INFO] Completed 6 cycles, pausing for 1 hour...\n")
+            await asyncio.sleep(random.randint(3611,4008))  # 1 hour
+        else:
+            sleep_time = random.randint(711, 1623)
+            print(f"[INFO] Sleeping for {sleep_time} seconds...\n")
+            await asyncio.sleep(sleep_time)
 
 # ---------------- MAIN ----------------
 @client.event
 async def on_ready():
     print(f"[+] Discord bot logged in as {client.user}")
     login_client()
+
+   # ✅ Cache the target user ID once
+    global TARGET_USER_ID
+    TARGET_USER_ID = safe_get_user_id(TARGET_USER)
+    if not TARGET_USER_ID:
+        print("[!] Could not fetch target user ID. Exiting...")
+        return
 
     # ✅ Keep images, no deletion
     asyncio.create_task(story_loop())

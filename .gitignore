@@ -13,3 +13,5 @@ stories/
 # IDE stuff
 .vscode/
 .idea/
+
+FETCH_HEAD

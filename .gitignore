@@ -6,6 +6,7 @@ __pycache__/
 .env
 session.json
 seen.json
+blocklist.json
 
 # Downloads
 stories/

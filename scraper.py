@@ -34,8 +34,8 @@ print("[DEBUG] DISCORD_TOKEN present:", bool(DISCORD_TOKEN))
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-BLOCKLIST = ["lmao", "lol","lmk","imo","tysm","stress","type something...","anxious","scared","harm","married","q&a sticker","prestige","easy","scars","hot","hotter","prized","hey","reel","guys","flooding","heck",
-             "why recruiters still","imk","dumb","wanna", "sudo", "zero", "sorry", "replied","zero2sudo","proud","congrats","dm'd","dm","dms","mistake","before i post them."]
+with open("blocklist.json", "r") as f:
+    BLOCKLIST = json.load(f)
 
 cl = Client()
 

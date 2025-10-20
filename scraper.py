@@ -222,17 +222,18 @@ async def check_stories():
                 await asyncio.sleep(random.randint(17, 64)) # x seconds delay between each story
 
     except LoginRequired:
-    	print("[!] Login required during story fetch. NOT auto logging in.")
-    	try:
-        	loop = asyncio.get_running_loop()
-	        loop.create_task(send_dm_to_me(
-        	    "⚠️ ALERT: Instagram session invalid during story fetch. "
-            	"Do NOT auto-login; refresh session.json manually from your PC."
-        	))
-    	except Exception as e:
-        	print(f"[!] Failed to send DM alert: {e}")
+        print("[!] Login required during story fetch. NOT auto logging in.")
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(send_dm_to_me(
+            "⚠️ ALERT: Instagram session invalid during story fetch. "
+            "Do NOT auto-login; refresh session.json manually from your PC."
+            ))
+        except Exception as e:
+            print(f"[!] Failed to send DM alert: {e}")
 
-    	return  # skip this cycle
+        return  # skip this cycle
+
 
 
 

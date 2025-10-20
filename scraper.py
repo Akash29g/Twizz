@@ -143,7 +143,6 @@ async def send_discord_message(text, image_path=None):
     # Create embed
     embed = discord.Embed(
         title="🌟New Update",
-        description=text if text else "No text detected",
         color=0x5865F2
     )
 
@@ -154,7 +153,7 @@ async def send_discord_message(text, image_path=None):
         await channel.send(embed=embed, file=file)
     else:
         # Just send embed with text
-        await channel.send(embed=embed)
+        print("[SKIP] No image found to send.")
 
 
 
